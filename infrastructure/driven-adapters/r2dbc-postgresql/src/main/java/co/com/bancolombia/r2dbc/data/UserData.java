@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.time.LocalDate;
+
 @Data
 @Table("users")
 public class UserData {
@@ -16,7 +18,7 @@ public class UserData {
     @Column("apellidos")
     private String apellidos;
     @Column("fecha_nacimiento")
-    private String fechaNacimiento;
+    private LocalDate fechaNacimiento;
     @Column("direccion")
     private String direccion;
     @Column("telefono")
@@ -24,5 +26,5 @@ public class UserData {
     @Column("correo_electronico")
     private String correoElectronico;
     @Column("salario_base")
-    private String salarioBase;
+    private Long salarioBase;
 }

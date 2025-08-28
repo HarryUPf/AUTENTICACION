@@ -12,13 +12,14 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(GET("/api/v1/users"), handler::getAllUsers)
+        return route(POST("/api/v1/users"), handler::createUser)
 
-                .andRoute(POST("/api/v1/users/search"), handler::searchUsers)
-                .andRoute(POST("/api/v1/users"), handler::createUser)
+//                .andRoute(POST("/api/v1/users/search"), handler::searchUsers)
+//                .andRoute(GET("/api/v1/users"), handler::getAllUsers)
 
-                .andRoute(GET("/api/v1/users/{id}"), handler::getUserById)
-                .andRoute(PUT("/api/v1/users/{id}"), handler::updateUser)
-                .andRoute(DELETE("/api/v1/users/{id}"), handler::deleteUser);
+//                .andRoute(GET("/api/v1/users/{id}"), handler::getUserById)
+//                .andRoute(PUT("/api/v1/users/{id}"), handler::updateUser)
+//                .andRoute(DELETE("/api/v1/users/{id}"), handler::deleteUser)
+                ;
     }
 }

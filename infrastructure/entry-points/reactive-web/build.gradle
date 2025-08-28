@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':usecase')
+    implementation project(':validation')
     implementation project(':model')
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
