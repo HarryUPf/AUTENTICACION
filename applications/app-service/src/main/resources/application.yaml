@@ -2,7 +2,7 @@ server:
   port: 8080
 spring:
   application:
-    name: "CrediYa"
+    name: "AUTENTICACION"
   devtools:
     add-properties: false
 #  h2:
