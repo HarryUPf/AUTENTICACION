@@ -28,24 +28,24 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         // The ID is null for a new user, and the database will generate it.
         return super.save(user);
     }
-
-    @Override
-    @Transactional
-    public Mono<User> update(Long id, User user) {
-        return this.repository.findById(id)
-                .flatMap(existing -> {
-                    // Set the ID on the entity to ensure we perform an update
-                    UserData userToUpdate = toData(user);
-                    userToUpdate.setId(id);
-                    return repository.save(userToUpdate);
-                }).map(this::toEntity);
-    }
-
-    @Override
-    public Mono<Void> deleteById(Long id) {
-        return repository.deleteById(id);
-    }
-
+//
+//    @Override
+//    @Transactional
+//    public Mono<User> update(Long id, User user) {
+//        return this.repository.findById(id)
+//                .flatMap(existing -> {
+//                    // Set the ID on the entity to ensure we perform an update
+//                    UserData userToUpdate = toData(user);
+//                    userToUpdate.setId(id);
+//                    return repository.save(userToUpdate);
+//                }).map(this::toEntity);
+//    }
+//
+//    @Override
+//    public Mono<Void> deleteById(Long id) {
+//        return repository.deleteById(id);
+//    }
+//
     @Override
     public Flux<User> findByExample(User user) {
         // Leverages the implementation from the base class
