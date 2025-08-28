@@ -31,4 +31,9 @@ public class Handler {
         // useCase.logic();
         return ServerResponse.ok().bodyValue("listenPOSTUsuariosUseCase");
     }
+
+    public Mono<ServerResponse> listenPOSTSolicitudUseCase(ServerRequest serverRequest) {
+        // useCase.logic();
+        return ServerResponse.ok().bodyValue("listenPOSTSolicitudUseCase");
+    }
 }
