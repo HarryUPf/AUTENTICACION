@@ -1,9 +1,8 @@
 package co.com.bancolombia.r2dbc;
 
-import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
+import co.com.bancolombia.r2dbc.data.UserData;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 
-// TODO: This file is just an example, you should delete or modify it
-public interface MyReactiveRepository extends ReactiveCrudRepository<Object, String>, ReactiveQueryByExampleExecutor<Object> {
-
+public interface MyReactiveRepository extends ReactiveCrudRepository<UserData, Long>, ReactiveQueryByExampleExecutor<UserData> {
 }

@@ -5,18 +5,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.GET;
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
 public class RouterRest {
     @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(GET("/api/usecase/path"), handler::listenGETUseCase)
-                .andRoute(POST("/api/usecase/otherpath"), handler::listenPOSTUseCase)
-                .andRoute(POST("/api/v1/usuarios"), handler::listenPOSTUsuariosUseCase)
-                .andRoute(POST("/api/v1/solicitud"), handler::listenPOSTSolicitudUseCase)
-                .and(route(GET("/api/otherusercase/path"), handler::listenGETOtherUseCase));
+        return route(GET("/api/v1/users"), handler::getAllUsers)
+
+                .andRoute(POST("/api/v1/users/search"), handler::searchUsers)
+                .andRoute(POST("/api/v1/users"), handler::createUser)
+
+                .andRoute(GET("/api/v1/users/{id}"), handler::getUserById)
+                .andRoute(PUT("/api/v1/users/{id}"), handler::updateUser)
+                .andRoute(DELETE("/api/v1/users/{id}"), handler::deleteUser);
     }
 }

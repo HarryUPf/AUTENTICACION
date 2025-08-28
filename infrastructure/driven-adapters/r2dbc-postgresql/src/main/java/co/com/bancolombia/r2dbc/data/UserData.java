@@ -1,0 +1,28 @@
+package co.com.bancolombia.r2dbc.data;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
+
+@Data
+@Table("users")
+public class UserData {
+
+    @Id
+    private Long id;
+    @Column("nombres")
+    private String nombres;
+    @Column("apellidos")
+    private String apellidos;
+    @Column("fecha_nacimiento")
+    private String fechaNacimiento;
+    @Column("direccion")
+    private String direccion;
+    @Column("telefono")
+    private String telefono;
+    @Column("correo_electronico")
+    private String correoElectronico;
+    @Column("salario_base")
+    private String salarioBase;
+}
