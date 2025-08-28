@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +37,9 @@ public class ValidationHelper {
 
         if (user.getSalarioBase() == null) {
             validationResults.put("'Salario Base'", "nulo");
-        } else if (user.getSalarioBase() < 0 || user.getSalarioBase() > 15000000) {
-            validationResults.put("'Salario Base'", "debe ser un valor numérico entre 0 y 15,000,000");
+        } else if (user.getSalarioBase().compareTo(BigDecimal.ZERO) < 0 ||
+                user.getSalarioBase().compareTo(new BigDecimal(15000000)) > 0) {
+                validationResults.put("'Salario Base'", "debe ser un valor numérico entre 0 y 15,000,000");
         }
 
         Map<String, List<String>> errorsByType = validationResults.entrySet().stream()

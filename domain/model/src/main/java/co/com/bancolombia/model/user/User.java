@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -19,5 +20,5 @@ public class User {
     private String direccion;
     private String telefono;
     private String correoElectronico;
-    private Long salarioBase;
+    private BigDecimal salarioBase;
 }
