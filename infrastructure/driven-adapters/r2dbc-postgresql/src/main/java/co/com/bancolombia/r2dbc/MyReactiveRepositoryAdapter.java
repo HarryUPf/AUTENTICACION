@@ -12,8 +12,8 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
-        User, // Domain Model
-        UserData, // Data Model
+        User,
+        UserData,
         Long,
         MyReactiveRepository
 > implements UserRepository {
@@ -25,30 +25,16 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     @Override
     @Transactional
     public Mono<User> save(User user) {
-        // The ID is null for a new user, and the database will generate it.
         return super.save(user);
     }
-//
-//    @Override
-//    @Transactional
-//    public Mono<User> update(Long id, User user) {
-//        return this.repository.findById(id)
-//                .flatMap(existing -> {
-//                    // Set the ID on the entity to ensure we perform an update
-//                    UserData userToUpdate = toData(user);
-//                    userToUpdate.setId(id);
-//                    return repository.save(userToUpdate);
-//                }).map(this::toEntity);
-//    }
-//
-//    @Override
-//    public Mono<Void> deleteById(Long id) {
-//        return repository.deleteById(id);
-//    }
-//
+
     @Override
     public Flux<User> findByExample(User user) {
-        // Leverages the implementation from the base class
         return super.findByExample(user);
+    }
+
+    @Override
+    public Mono<Boolean> existsByEmail(String email) {
+        return repository.existsByCorreoElectronico(email);
     }
 }
