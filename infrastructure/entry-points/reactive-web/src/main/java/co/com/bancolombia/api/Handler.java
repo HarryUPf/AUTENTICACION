@@ -37,53 +37,22 @@ public class Handler {
     @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
     public Mono<ServerResponse> createUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserDTO.class)
-                .doOnSubscribe(subscription -> log.info(">>> Starting createUser flow"))
-                .map(userDTO -> {
-                    // Si el rol no viene en el DTO, se asigna 'CLIENTE' por defecto.
-                    // Esto evita que el campo llegue nulo al mapper y la DB use su default.
-                    if (userDTO.getRole() == null || userDTO.getRole().isEmpty()) {
-                        log.warn("Role not provided in request, defaulting to 'CLIENTE'");
-                        userDTO.setRole("CLIENTE");
-                    }
-                    // Ahora, el mapper sí recibirá el rol para convertirlo al objeto de dominio.
-                    return userMapper.toDomain(userDTO);
-                })
+                .map(userMapper::toDomain) // La lógica de rol por defecto ahora está en el UseCase
                 .flatMap(userUseCase::createUser)
-                .doOnSuccess(user -> log.info("<<< User created successfully: {}", user.toString()))
                 .flatMap(user -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(Map.of("message", "Usuario creado con correo electrónico: " + user.getEmail())))
-                .doOnError(IllegalArgumentException.class, e -> log.warn("!!! Validation error in createUser: {}", e.getMessage()))
-                .doOnError(e -> !(e instanceof IllegalArgumentException), e -> log.error("!!! Internal error in createUser", e))
-                .onErrorResume(IllegalArgumentException.class, e ->
-                        ServerResponse.badRequest()
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValue(Map.of("error", e.getMessage())))
-                .onErrorResume(e -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(Map.of("error", "Ocurrió un error interno inesperado.")));
+                        .bodyValue(Map.of("message", "Usuario creado con correo electrónico: " + user.getEmail())));
     }
 
     public Mono<ServerResponse> login(ServerRequest serverRequest) {
-        return serverRequest.bodyToMono(AuthRequestDTO.class)
-                .doOnSubscribe(subscription -> log.info(">>> Starting login flow"))
+        return serverRequest.bodyToMono(AuthRequestDTO.class)                
                 .flatMap(dto -> {
                     Authentication authenticationToken = new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword());
                     return this.authenticationManager.authenticate(authenticationToken)
                             .map(this.jwtProvider::generateToken);
                 })
-                .doOnSuccess(token -> log.info("<<< Login successful, token generated"))
                 .flatMap(jwt -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(new AuthResponseDTO(jwt)))
-                .doOnError(BadCredentialsException.class, e -> log.warn("!!! Invalid credentials attempt"))
-                .doOnError(e -> !(e instanceof BadCredentialsException), e -> log.error("!!! Internal error in login", e))
-                .onErrorResume(BadCredentialsException.class, e ->
-                        ServerResponse.status(HttpStatus.UNAUTHORIZED)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .bodyValue(Map.of("error", "Credenciales inválidas")))
-                .onErrorResume(e -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(Map.of("error", "Error interno en el servidor.")));
+                        .bodyValue(new AuthResponseDTO(jwt)));
     }
 }
