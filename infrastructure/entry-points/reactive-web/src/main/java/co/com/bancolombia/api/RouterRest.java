@@ -20,6 +20,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
+import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
 
 @Configuration
 public class RouterRest {
@@ -72,7 +73,8 @@ public class RouterRest {
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
-        return route(POST("/api/v1/usuarios"), handler::createUser)
-                .andRoute(POST("/api/v1/login"), handler::login);
+        final var apiV1 = path("/api/v1");
+        return route(POST("/api/v1/login"), handler::login)
+                .and(nest(apiV1, route(POST("/usuarios"), handler::createUser)));
     }
 }

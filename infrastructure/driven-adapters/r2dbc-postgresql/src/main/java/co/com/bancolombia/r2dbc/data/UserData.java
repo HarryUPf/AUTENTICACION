@@ -30,4 +30,6 @@ public class UserData {
     private BigDecimal salarioBase;
     @Column("password")
     private String password;
+    @Column("role")
+    private String role;
 }
