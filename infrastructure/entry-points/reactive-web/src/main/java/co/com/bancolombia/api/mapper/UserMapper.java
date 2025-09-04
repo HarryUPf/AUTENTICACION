@@ -11,7 +11,8 @@ public class UserMapper {
         return User.builder()
                 .nombres(dto.getNombres())
                 .apellidos(dto.getApellidos())
-                .correoElectronico(dto.getCorreoElectronico())
+                .email(dto.getEmail())
+                .password(dto.getPassword())
                 .salarioBase(dto.getSalarioBase())
                 .build();
     }
@@ -20,7 +21,8 @@ public class UserMapper {
         return UserDTO.builder()
                 .nombres(user.getNombres())
                 .apellidos(user.getApellidos())
-                .correoElectronico(user.getCorreoElectronico())
+                .password(user.getPassword())
+                .email(user.getEmail())
                 .salarioBase(user.getSalarioBase())
                 .build();
     }

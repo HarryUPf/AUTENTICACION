@@ -20,7 +20,7 @@ class UserTest {
                 .id(id)
                 .nombres(nombres)
                 .apellidos(apellidos)
-                .correoElectronico(correo)
+                .email(correo)
                 .salarioBase(salario)
                 .build();
 
@@ -29,7 +29,7 @@ class UserTest {
         assertEquals(id, user.getId());
         assertEquals(nombres, user.getNombres());
         assertEquals(apellidos, user.getApellidos());
-        assertEquals(correo, user.getCorreoElectronico());
+        assertEquals(correo, user.getEmail());
         assertEquals(0, salario.compareTo(user.getSalarioBase())); // Use compareTo for BigDecimal
     }
 
@@ -47,7 +47,7 @@ class UserTest {
         user.setId(id);
         user.setNombres(nombres);
         user.setApellidos(apellidos);
-        user.setCorreoElectronico(correo);
+        user.setEmail(correo);
         user.setSalarioBase(salario);
 
         // Assert

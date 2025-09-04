@@ -1,14 +1,20 @@
 package co.com.bancolombia.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import co.com.bancolombia.model.user.User;
+import co.com.bancolombia.api.dto.AuthRequestDTO;
+import co.com.bancolombia.api.dto.AuthResponseDTO;
 import co.com.bancolombia.api.dto.UserDTO;
 import co.com.bancolombia.api.mapper.UserMapper;
+import co.com.bancolombia.api.security.JwtProvider;
 import co.com.bancolombia.usecase.user.UserUseCase;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
@@ -24,6 +30,8 @@ public class Handler {
 
     private final UserUseCase userUseCase;
     private final UserMapper userMapper;
+    private final ReactiveAuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
     public Mono<ServerResponse> createUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserDTO.class)
@@ -33,7 +41,7 @@ public class Handler {
                 .doOnSuccess(user -> log.info("<<< User created successfully: {}", user.toString()))
                 .flatMap(user -> ServerResponse.status(HttpStatus.CREATED)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(Map.of("message", "Usuario creado con correo electrónico: " + user.getCorreoElectronico())))
+                        .bodyValue(Map.of("message", "Usuario creado con correo electrónico: " + user.getEmail())))
                 .doOnError(IllegalArgumentException.class, e -> log.warn("!!! Validation error in createUser: {}", e.getMessage()))
                 .doOnError(e -> !(e instanceof IllegalArgumentException), e -> log.error("!!! Internal error in createUser", e))
                 .onErrorResume(IllegalArgumentException.class, e ->
@@ -45,4 +53,26 @@ public class Handler {
                         .bodyValue(Map.of("error", "Ocurrió un error interno inesperado.")));
     }
 
+    public Mono<ServerResponse> login(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(AuthRequestDTO.class)
+                .doOnSubscribe(subscription -> log.info(">>> Starting login flow"))
+                .flatMap(dto -> {
+                    Authentication authenticationToken = new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword());
+                    return this.authenticationManager.authenticate(authenticationToken)
+                            .map(this.jwtProvider::generateToken);
+                })
+                .doOnSuccess(token -> log.info("<<< Login successful, token generated"))
+                .flatMap(jwt -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(new AuthResponseDTO(jwt)))
+                .doOnError(BadCredentialsException.class, e -> log.warn("!!! Invalid credentials attempt"))
+                .doOnError(e -> !(e instanceof BadCredentialsException), e -> log.error("!!! Internal error in login", e))
+                .onErrorResume(BadCredentialsException.class, e ->
+                        ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(Map.of("error", "Credenciales inválidas")))
+                .onErrorResume(e -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(Map.of("error", "Error interno en el servidor.")));
+    }
 }

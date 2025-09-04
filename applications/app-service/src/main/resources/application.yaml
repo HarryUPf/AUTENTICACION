@@ -23,7 +23,11 @@ adapters:
   r2dbc:
     host: localhost
     port: 5432
-    database: postgres_db
+    database: bootcamp_db
     schema: public
     username: postgres
     password: postgres
+
+jwt:
+  secret: "a-very-long-and-secure-secret-key-that-is-at-least-256-bits-long-for-hs256"
+  expiration: 86400000 # 24 horas en milisegundos

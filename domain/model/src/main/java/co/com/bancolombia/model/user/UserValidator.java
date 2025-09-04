@@ -26,9 +26,9 @@ public final class UserValidator {
         }
 
         // Email validation
-        if (user.getCorreoElectronico() == null || user.getCorreoElectronico().isBlank()) {
+        if (user.getEmail() == null || user.getEmail().isBlank()) {
             errors.add("El campo 'Correo Electronico' no puede ser nulo o vacío");
-        } else if (!EMAIL_PATTERN.matcher(user.getCorreoElectronico()).matches()) {
+        } else if (!EMAIL_PATTERN.matcher(user.getEmail()).matches()) {
             errors.add("El campo 'Correo Electronico' tiene un formato de email inválido");
         }
 

@@ -19,6 +19,7 @@ public class User {
     private LocalDate fechaNacimiento;
     private String direccion;
     private String telefono;
-    private String correoElectronico;
+    private String email;
     private BigDecimal salarioBase;
+    private String password;
 }

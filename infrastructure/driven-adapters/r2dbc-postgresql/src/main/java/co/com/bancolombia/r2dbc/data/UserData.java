@@ -24,8 +24,10 @@ public class UserData {
     private String direccion;
     @Column("telefono")
     private String telefono;
-    @Column("correo_electronico")
-    private String correoElectronico;
+    @Column("email")
+    private String email;
     @Column("salario_base")
     private BigDecimal salarioBase;
+    @Column("password")
+    private String password;
 }

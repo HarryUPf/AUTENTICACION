@@ -2,6 +2,7 @@ package co.com.bancolombia.usecase.user;
 
 import co.com.bancolombia.model.user.User;
 import co.com.bancolombia.model.user.UserValidator;
+import co.com.bancolombia.model.user.gateways.PasswordEncryptor;
 import co.com.bancolombia.model.user.gateways.UserRepository;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
@@ -13,7 +14,7 @@ import java.util.List;
 public class UserUseCase {
 
     private final UserRepository userRepository;
-
+    private final PasswordEncryptor passwordEncryptor;
 //    public Flux<User> getAllUsers() {
 //        return userRepository.findAll();
 //    }
@@ -35,12 +36,18 @@ public class UserUseCase {
         }
 
         // 2. Validación de proceso (regla de negocio que requiere IO)
-        return userRepository.existsByEmail(user.getCorreoElectronico())
+        return userRepository.existsByEmail(user.getEmail())
                 .flatMap(exists -> {
                     if (Boolean.TRUE.equals(exists)) {
-                        return Mono.error(new IllegalArgumentException("El correo electrónico '" + user.getCorreoElectronico() + "' ya está en uso."));
+                        return Mono.error(new IllegalArgumentException("El correo electrónico '" + user.getEmail() + "' ya está en uso."));
                     }
-                    return userRepository.save(user);
+//                    return userRepository.save(user);
+                    return Mono.just(user)
+                            .map(u -> {
+                                u.setPassword(passwordEncryptor.encode(u.getPassword()));
+                                return u;
+                            })
+                            .flatMap(userRepository::save);
                 });
     }
 
@@ -54,5 +61,11 @@ public class UserUseCase {
 
     public Flux<User> searchUsers(User user) {
         return userRepository.findByExample(user);
+    }
+
+    public Mono<User> findByEmail(String email) {
+        // Este método es crucial para que Spring Security (a través de UserDetailsServiceImpl)
+        // pueda buscar al usuario durante el proceso de login.
+        return userRepository.findByEmail(email);
     }
 }

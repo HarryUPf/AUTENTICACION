@@ -1,6 +1,8 @@
 package co.com.bancolombia.api;
 
+import co.com.bancolombia.api.dto.AuthRequestDTO;
 import co.com.bancolombia.api.dto.UserDTO;
+import co.com.bancolombia.api.dto.AuthResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -22,7 +24,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @Configuration
 public class RouterRest {
     @Bean
-    @RouterOperations(
+    @RouterOperations({
             @RouterOperation(
                     path = "/api/v1/usuarios",
                     produces = {MediaType.APPLICATION_JSON_VALUE},
@@ -45,10 +47,32 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content(schema = @Schema(implementation = java.util.Map.class)))
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/login",
+                    produces = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.POST,
+                    beanClass = Handler.class,
+                    beanMethod = "login",
+                    operation = @Operation(
+                            operationId = "login",
+                            summary = "Iniciar sesión de usuario",
+                            description = "Autentica un usuario con email y password y devuelve un token JWT si las credenciales son correctas.",
+                            tags = {"Autenticación"},
+                            requestBody = @RequestBody(
+                                    description = "Credenciales de inicio de sesión",
+                                    required = true,
+                                    content = @Content(schema = @Schema(implementation = AuthRequestDTO.class))
+                            ),
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Login exitoso", content = @Content(schema = @Schema(implementation = AuthResponseDTO.class))),
+                                    @ApiResponse(responseCode = "401", description = "Credenciales inválidas", content = @Content(schema = @Schema(implementation = java.util.Map.class)))
+                            }
+                    )
             )
-    )
+    })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/usuarios"), handler::createUser)
-        ;
+                .andRoute(POST("/api/v1/login"), handler::login);
     }
 }

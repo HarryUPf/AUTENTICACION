@@ -35,6 +35,12 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
 
     @Override
     public Mono<Boolean> existsByEmail(String email) {
-        return repository.existsByCorreoElectronico(email);
+        return repository.existsByEmail(email);
+    }
+
+    @Override
+    public Mono<User> findByEmail(String email) {
+        return repository.findByEmail(email)
+                .map(this::toEntity);
     }
 }
