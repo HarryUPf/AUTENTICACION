@@ -5,13 +5,19 @@ import co.com.bancolombia.api.dto.UserDTO;
 import co.com.bancolombia.api.dto.EmailRequestDTO;
 import co.com.bancolombia.api.dto.IdRequestDTO;
 import co.com.bancolombia.api.dto.AuthResponseDTO;
+
+import org.springdoc.core.annotations.RouterOperation;
+import org.springdoc.core.annotations.RouterOperations;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springdoc.core.annotations.RouterOperation;
-import org.springdoc.core.annotations.RouterOperations;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.info.Info;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +31,19 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 import static org.springframework.web.reactive.function.server.RouterFunctions.nest;
 
 @Configuration
+@OpenAPIDefinition(
+        info = @Info(
+                title = "User Authentication API",
+                version = "1.0",
+                description = "API for user management and authentication."
+        )
+)
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class RouterRest {
     @Bean
     @RouterOperations({
@@ -36,6 +55,7 @@ public class RouterRest {
                     beanMethod = "createUser",
                     operation = @Operation(
                             operationId = "createUser",
+                            security = @SecurityRequirement(name = "bearerAuth"),
                             summary = "Crear un nuevo usuario",
                             description = "Crea un nuevo usuario en el sistema. Valida que los campos no sean nulos/vacíos, que el formato del email sea correcto, que el salario esté en el rango permitido y que el email no exista previamente.",
                             tags = {"Usuarios"},
@@ -81,6 +101,7 @@ public class RouterRest {
                     beanMethod = "getUserById",
                     operation = @Operation(
                             operationId = "getUserById",
+                            security = @SecurityRequirement(name = "bearerAuth"),
                             summary = "Buscar usuario por ID",
                             description = "Busca y devuelve los datos de un usuario a partir de su ID, proporcionado en el cuerpo de la solicitud.",
                             tags = {"Usuarios"},
@@ -91,14 +112,17 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = java.util.Map.class)))
                             }
                     )
+            ),
 //            @RouterOperation(
-//                    path = "/api/v1/usuarios/buscar",
+//                    path = "/api/v1/usuarios/buscar-por-email",
 //                    produces = {MediaType.APPLICATION_JSON_VALUE},
 //                    method = RequestMethod.POST,
 //                    beanClass = Handler.class,
 //                    beanMethod = "findUserByEmail",
 //                    operation = @Operation(
 //                            operationId = "findUserByEmail",
+//                      security = @SecurityRequirement(name = "bearerAuth"),
+
 //                            summary = "Buscar usuario por email",
 //                            description = "Busca y devuelve los datos de un usuario a partir de su dirección de correo electrónico, proporcionada en el cuerpo de la solicitud.",
 //                            tags = {"Usuarios"},
@@ -110,14 +134,12 @@ public class RouterRest {
 //                            }
 //                    )
 //            )
-            )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         final var apiV1 = path("/api/v1");
         return route(POST("/api/v1/login"), handler::login)
-                // In RouterRest.java, inside your routerFunction...
                 .andRoute(POST("/api/v1/usuarios/buscar-por-id"), handler::getUserById)
-//                .andRoute(POST("/api/v1/usuarios/buscar"), handler::findUserByEmail)
+//                .andRoute(POST("/api/v1/usuarios/buscar-por-email"), handler::findUserByEmail)
                 .and(nest(apiV1, route(POST("/usuarios"), handler::createUser)));
     }
 }
