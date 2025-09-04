@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -28,11 +29,24 @@ public class UserUseCase {
 //    }
 
     public Mono<User> createUser(User user) {
+        // Asignar rol por defecto si no se proporciona y normalizar a mayúsculas
+        if (user.getRole() == null || user.getRole().trim().isEmpty()) {
+            user.setRole("CLIENTE");
+        } else {
+            user.setRole(user.getRole().toUpperCase());
+        }
+
         // La validación de unicidad es una regla de negocio, por lo que pertenece aquí.
         // 1. Validación de invariantes del dominio
         List<String> validationErrors = UserValidator.validate(user);
         if (!validationErrors.isEmpty()) {
             return Mono.error(new IllegalArgumentException(String.join(". ", validationErrors)));
+        }
+
+        // Validar que el rol sea uno de los permitidos
+        List<String> allowedRoles = Arrays.asList("ADMIN", "ASESOR", "CLIENTE");
+        if (!allowedRoles.contains(user.getRole())) {
+            return Mono.error(new IllegalArgumentException("El rol '" + user.getRole() + "' no es válido."));
         }
 
         // 2. Validación de proceso (regla de negocio que requiere IO)

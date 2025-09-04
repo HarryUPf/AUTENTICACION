@@ -24,8 +24,8 @@ public class UserDetailsServiceImpl implements ReactiveUserDetailsService {
                 .map(user -> new User(
                         user.getEmail(),
                         user.getPassword(),
-                        // Por ahora, asignamos un rol por defecto. Podrías expandir tu modelo para incluir roles.
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                        // Usamos el rol del usuario, prefijado con "ROLE_" como es convención en Spring Security.
+                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole()))
                 ));
     }
 }

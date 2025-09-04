@@ -6,15 +6,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class UserDTO {
-    private String nombres;
-    private String apellidos;
     private String email;
     private String password;
+    private String role;
+    private String nombres;
+    private String apellidos;
+    private LocalDate fechaNacimiento;
+    private String direccion;
+    private String telefono;
     private BigDecimal salarioBase;
 }
