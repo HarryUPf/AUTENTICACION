@@ -1,8 +1,7 @@
 package co.com.bancolombia.api;
 
-import co.com.bancolombia.api.dto.AuthRequestDTO;
-import co.com.bancolombia.api.dto.AuthResponseDTO;
-import co.com.bancolombia.api.dto.UserDTO;
+import co.com.bancolombia.api.dto.*;
+import co.com.bancolombia.api.dto.UserLoginDTO;
 import co.com.bancolombia.api.mapper.UserMapper;
 import co.com.bancolombia.api.security.JwtProvider;
 import co.com.bancolombia.usecase.user.UserUseCase;
@@ -34,7 +33,7 @@ public class Handler {
     private final ReactiveAuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
+//    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
     public Mono<ServerResponse> createUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserDTO.class)
                 .map(userMapper::toDomain) // La lógica de rol por defecto ahora está en el UseCase
@@ -46,13 +45,51 @@ public class Handler {
 
     public Mono<ServerResponse> login(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(AuthRequestDTO.class)                
-                .flatMap(dto -> {
-                    Authentication authenticationToken = new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword());
-                    return this.authenticationManager.authenticate(authenticationToken)
-                            .map(this.jwtProvider::generateToken);
-                })
-                .flatMap(jwt -> ServerResponse.ok()
+                .flatMap(authRequest -> {
+                    Authentication authenticationToken = new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword());
+                    Mono<String> tokenMono = this.authenticationManager.authenticate(authenticationToken)
+                            .map(this.jwtProvider::generateToken)
+                            .switchIfEmpty(Mono.error(new BadCredentialsException("Invalid credentials")));
+
+                    Mono<UserLoginDTO> userLoginDTOMono = userUseCase.findByEmail(authRequest.getEmail())
+                            .map(userMapper::toLoginDTO);
+                    return Mono.zip(tokenMono, userLoginDTOMono, AuthResponseDTO::new);
+                }).flatMap(authResponse -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(new AuthResponseDTO(jwt)));
+                        .bodyValue(authResponse));
+    }
+
+    @PreAuthorize("hasRole('ASESOR')")
+    public Mono<ServerResponse> findUserByEmail(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(EmailRequestDTO.class)
+                .flatMap(emailRequest -> {
+                    if (emailRequest.getEmail() == null || emailRequest.getEmail().isBlank()) {
+                        return ServerResponse.badRequest().bodyValue(Map.of("error", "El campo 'email' es requerido en el cuerpo de la solicitud"));
+                    }
+                    return userUseCase.findByEmail(emailRequest.getEmail())
+                            .map(userMapper::toDTO)
+                            .flatMap(userDTO -> ServerResponse.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(userDTO))
+                            .switchIfEmpty(ServerResponse.status(HttpStatus.NOT_FOUND)
+                                    .bodyValue(Map.of("error", "Usuario no encontrado con el email: " + emailRequest.getEmail())));
+                });
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
+    public Mono<ServerResponse> getUserById(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(IdRequestDTO.class)
+                .flatMap(idRequest -> {
+                    if (idRequest.getId() == null) {
+                        return ServerResponse.badRequest().bodyValue(Map.of("error", "El campo 'id' es requerido en el cuerpo de la solicitud"));
+                    }
+                    return userUseCase.getUserById(idRequest.getId())
+                            .map(userMapper::toDTO)
+                            .flatMap(userDTO -> ServerResponse.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(userDTO))
+                            .switchIfEmpty(ServerResponse.status(HttpStatus.NOT_FOUND)
+                                    .bodyValue(Map.of("error", "Usuario no encontrado con el ID: " + idRequest.getId())));
+                });
     }
 }

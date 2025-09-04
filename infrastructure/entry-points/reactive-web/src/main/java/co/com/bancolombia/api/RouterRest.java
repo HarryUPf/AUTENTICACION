@@ -2,6 +2,8 @@ package co.com.bancolombia.api;
 
 import co.com.bancolombia.api.dto.AuthRequestDTO;
 import co.com.bancolombia.api.dto.UserDTO;
+import co.com.bancolombia.api.dto.EmailRequestDTO;
+import co.com.bancolombia.api.dto.IdRequestDTO;
 import co.com.bancolombia.api.dto.AuthResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,11 +72,52 @@ public class RouterRest {
                                     @ApiResponse(responseCode = "401", description = "Credenciales inválidas", content = @Content(schema = @Schema(implementation = java.util.Map.class)))
                             }
                     )
+            ),
+            @RouterOperation(
+                    path = "/api/v1/usuarios/buscar-por-id",
+                    produces = {MediaType.APPLICATION_JSON_VALUE},
+                    method = RequestMethod.POST,
+                    beanClass = Handler.class,
+                    beanMethod = "getUserById",
+                    operation = @Operation(
+                            operationId = "getUserById",
+                            summary = "Buscar usuario por ID",
+                            description = "Busca y devuelve los datos de un usuario a partir de su ID, proporcionado en el cuerpo de la solicitud.",
+                            tags = {"Usuarios"},
+                            requestBody = @RequestBody(required = true, description = "Objeto con el ID del usuario a buscar", content = @Content(schema = @Schema(implementation = IdRequestDTO.class))),
+                            responses = {
+                                    @ApiResponse(responseCode = "200", description = "Usuario encontrado", content = @Content(schema = @Schema(implementation = UserDTO.class))),
+                                    @ApiResponse(responseCode = "400", description = "Cuerpo de la solicitud inválido o ID faltante", content = @Content(schema = @Schema(implementation = java.util.Map.class))),
+                                    @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = java.util.Map.class)))
+                            }
+                    )
+//            @RouterOperation(
+//                    path = "/api/v1/usuarios/buscar",
+//                    produces = {MediaType.APPLICATION_JSON_VALUE},
+//                    method = RequestMethod.POST,
+//                    beanClass = Handler.class,
+//                    beanMethod = "findUserByEmail",
+//                    operation = @Operation(
+//                            operationId = "findUserByEmail",
+//                            summary = "Buscar usuario por email",
+//                            description = "Busca y devuelve los datos de un usuario a partir de su dirección de correo electrónico, proporcionada en el cuerpo de la solicitud.",
+//                            tags = {"Usuarios"},
+//                            requestBody = @RequestBody(required = true, description = "Objeto con el email del usuario a buscar", content = @Content(schema = @Schema(implementation = EmailRequestDTO.class))),
+//                            responses = {
+//                                    @ApiResponse(responseCode = "200", description = "Usuario encontrado", content = @Content(schema = @Schema(implementation = UserDTO.class))),
+//                                    @ApiResponse(responseCode = "400", description = "Cuerpo de la solicitud inválido o email faltante", content = @Content(schema = @Schema(implementation = java.util.Map.class))),
+//                                    @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = java.util.Map.class)))
+//                            }
+//                    )
+//            )
             )
     })
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         final var apiV1 = path("/api/v1");
         return route(POST("/api/v1/login"), handler::login)
+                // In RouterRest.java, inside your routerFunction...
+                .andRoute(POST("/api/v1/usuarios/buscar-por-id"), handler::getUserById)
+//                .andRoute(POST("/api/v1/usuarios/buscar"), handler::findUserByEmail)
                 .and(nest(apiV1, route(POST("/usuarios"), handler::createUser)));
     }
 }
