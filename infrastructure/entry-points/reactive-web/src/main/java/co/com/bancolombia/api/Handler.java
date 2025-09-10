@@ -32,8 +32,9 @@ public class Handler {
     private final UserMapper userMapper;
     private final ReactiveAuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private static final String ERROR_LABEL = "error";
 
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ASESOR')")
     public Mono<ServerResponse> createUser(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(UserDTO.class)
                 .map(userMapper::toDomain) // La lógica de rol por defecto ahora está en el UseCase
@@ -64,7 +65,7 @@ public class Handler {
         return serverRequest.bodyToMono(EmailRequestDTO.class)
                 .flatMap(emailRequest -> {
                     if (emailRequest.getEmail() == null || emailRequest.getEmail().isBlank()) {
-                        return ServerResponse.badRequest().bodyValue(Map.of("error", "El campo 'email' es requerido en el cuerpo de la solicitud"));
+                        return ServerResponse.badRequest().bodyValue(Map.of(ERROR_LABEL, "El campo 'email' es requerido en el cuerpo de la solicitud"));
                     }
                     return userUseCase.findByEmail(emailRequest.getEmail())
                             .map(userMapper::toDTO)
@@ -72,7 +73,7 @@ public class Handler {
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .bodyValue(userDTO))
                             .switchIfEmpty(ServerResponse.status(HttpStatus.NOT_FOUND)
-                                    .bodyValue(Map.of("error", "Usuario no encontrado con el email: " + emailRequest.getEmail())));
+                                    .bodyValue(Map.of(ERROR_LABEL, "Usuario no encontrado con el email: " + emailRequest.getEmail())));
                 });
     }
 
@@ -81,7 +82,7 @@ public class Handler {
         return serverRequest.bodyToMono(IdRequestDTO.class)
                 .flatMap(idRequest -> {
                     if (idRequest.getId() == null) {
-                        return ServerResponse.badRequest().bodyValue(Map.of("error", "El campo 'id' es requerido en el cuerpo de la solicitud"));
+                        return ServerResponse.badRequest().bodyValue(Map.of(ERROR_LABEL, "El campo 'id' es requerido en el cuerpo de la solicitud"));
                     }
                     return userUseCase.getUserById(idRequest.getId())
                             .map(userMapper::toDTO)
@@ -89,7 +90,7 @@ public class Handler {
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .bodyValue(userDTO))
                             .switchIfEmpty(ServerResponse.status(HttpStatus.NOT_FOUND)
-                                    .bodyValue(Map.of("error", "Usuario no encontrado con el ID: " + idRequest.getId())));
+                                    .bodyValue(Map.of(ERROR_LABEL, "Usuario no encontrado con el ID: " + idRequest.getId())));
                 });
     }
 }
