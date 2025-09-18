@@ -139,7 +139,7 @@ public class RouterRest {
         final var apiV1 = path("/api/v1");
         return route(POST("/api/v1/login"), handler::login)
                 .andRoute(POST("/api/v1/usuarios/buscar-por-id"), handler::getUserById)
-//                .andRoute(POST("/api/v1/usuarios/buscar-por-email"), handler::findUserByEmail)
+                .andRoute(POST("/api/v1/usuarios/buscar-por-email"), handler::findUserByEmail)
                 .and(nest(apiV1, route(POST("/usuarios"), handler::createUser)));
     }
 }

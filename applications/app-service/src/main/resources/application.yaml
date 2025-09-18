@@ -21,12 +21,16 @@ cors:
 
 adapters:
   r2dbc:
+#    host: db-bootcamp.c6d0um4u6vtu.us-east-1.rds.amazonaws.com
     host: localhost
     port: 5432
     database: bootcamp_db
     schema: public
     username: postgres
     password: postgres
+#   TODO: set ssl true for avoiding "pg_hba.conf" error
+#    properties:
+#      ssl: true
 
 jwt:
   secret: "a-very-long-and-secure-secret-key-that-is-at-least-256-bits-long-for-hs256"

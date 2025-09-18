@@ -1,4 +1,0 @@
-FROM eclipse-temurin:21-jdk-alpine
-COPY AUTENTICACION.jar service.jar
-EXPOSE 8080
-ENTRYPOINT [ "sh", "-c", "java -jar service.jar" ]

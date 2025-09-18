@@ -60,7 +60,7 @@ public class Handler {
                         .bodyValue(authResponse));
     }
 
-    @PreAuthorize("hasRole('ASESOR')")
+    @PreAuthorize("hasRole('ASESOR') or hasRole('CLIENTE')")
     public Mono<ServerResponse> findUserByEmail(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(EmailRequestDTO.class)
                 .flatMap(emailRequest -> {

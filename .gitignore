@@ -334,8 +334,3 @@ gradle-app.setting
 # -----
 *.hprof
 build-cache
-
-# secrets
-deployment/secrets
-deployment/database/*.sql
-deployment/.env
